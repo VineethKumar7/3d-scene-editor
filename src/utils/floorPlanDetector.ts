@@ -275,17 +275,19 @@ function findWindows(imageData: ImageData): DetectedOpening[] {
       const g = data[i + 1];
       const b = data[i + 2];
       
-      // Check if pixel is blue (window marker)
-      // Light blue: high blue, medium-high green, lower red
-      // Examples: #6BA4D9, #5B9BD5, #4A90C2
-      const isBlue = b > 130 && b > r * 1.2 && b >= g && g > 80;
+      // Cyan/sky blue windows: RGB(80, 165, 253) - high blue, medium green, low red
+      const isBlue = b > 180 && g > 130 && g < b && r < 120;
       
       if (isBlue) {
         // Flood fill to find the extent of this window region
         const region = floodFillBlueRegion(data, width, height, x, y, processed);
         
-        if (region.width >= minSize && region.height >= minSize &&
-            region.width <= maxSize && region.height <= maxSize) {
+        // Windows can be thin lines - check that the LARGER dimension meets minimum
+        // and that neither dimension is too big
+        const largerDim = Math.max(region.width, region.height);
+        const smallerDim = Math.min(region.width, region.height);
+        
+        if (largerDim >= minSize && largerDim <= maxSize * 1.5 && smallerDim >= 2) {
           const windowKey = `w-${Math.round(region.centerX / 30)}-${Math.round(region.centerY / 30)}`;
           if (!visited.has(windowKey)) {
             visited.add(windowKey);
@@ -336,8 +338,8 @@ function floodFillBlueRegion(
     const g = data[i + 1];
     const b = data[i + 2];
     
-    // Check if pixel is blue (same criteria)
-    const isBlue = b > 130 && b > r * 1.2 && b >= g && g > 80;
+    // Cyan/sky blue: high blue, medium green, low red
+    const isBlue = b > 180 && g > 130 && g < b && r < 120;
     
     if (!isBlue) continue;
     
@@ -365,11 +367,10 @@ function floodFillBlueRegion(
  * 1. Brown/orange colored regions (explicit door markers)
  * 2. Door swing arcs (dashed quarter circles) - interior doors
  */
-function findDoors(walls: DetectedWall[], imageData: ImageData): DetectedOpening[] {
+function findDoors(_walls: DetectedWall[], imageData: ImageData): DetectedOpening[] {
   const { width, height, data } = imageData;
   const doors: DetectedOpening[] = [];
   const visited = new Set<string>();
-  const minSize = Math.min(width, height) * 0.015;
   const maxSize = Math.min(width, height) * 0.12;
 
   // Create grayscale matrix for arc detection
@@ -382,8 +383,10 @@ function findDoors(walls: DetectedWall[], imageData: ImageData): DetectedOpening
     }
   }
 
-  // METHOD 1: Find brown/orange colored regions (external doors)
+  // METHOD 1: Find door colored regions (external doors)
+  // Handles: light beige/cream (~255, 237, 220) and dark brown (~119, 75, 48)
   const processed = new Set<string>();
+  const doorMinSize = Math.min(width, height) * 0.03; // 3% minimum for doors
   
   for (let y = 0; y < height; y += 3) {
     for (let x = 0; x < width; x += 3) {
@@ -395,14 +398,20 @@ function findDoors(walls: DetectedWall[], imageData: ImageData): DetectedOpening
       const g = data[i + 1];
       const b = data[i + 2];
       
-      // Brown/orange detection
-      const isBrown = r > 150 && g > 50 && g < 180 && b < 100 && r > b * 1.5;
+      // Light beige/cream door: RGB ~(255, 237, 220)
+      const isBeige = r > 240 && g > 220 && b > 200 && r > b + 15 && g > b + 5;
+      // Dark brown door interior: RGB ~(119, 75, 48)
+      const isBrownDark = r > 80 && r < 180 && g > 40 && g < 130 && b < 80 && r > g && r > b * 1.3;
+      const isDoor = isBeige || isBrownDark;
       
-      if (isBrown) {
-        const region = floodFillRegion(data, width, height, x, y, processed);
+      if (isDoor) {
+        const region = floodFillDoorRegion(data, width, height, x, y, processed);
         
-        if (region.width >= minSize && region.height >= minSize && 
-            region.width <= maxSize && region.height <= maxSize) {
+        // Doors should be larger - minimum 15px in larger dimension
+        const largerDim = Math.max(region.width, region.height);
+        const smallerDim = Math.min(region.width, region.height);
+        
+        if (largerDim >= 15 && largerDim >= doorMinSize && largerDim <= maxSize * 1.5 && smallerDim >= 3) {
           const doorKey = `d-${Math.round(region.centerX / 30)}-${Math.round(region.centerY / 30)}`;
           if (!visited.has(doorKey)) {
             visited.add(doorKey);
@@ -420,11 +429,25 @@ function findDoors(walls: DetectedWall[], imageData: ImageData): DetectedOpening
 
   // METHOD 2: Find door swing arcs (dashed quarter circles for interior doors)
   // Look for arc patterns near wall intersections
-  const doorRadius = Math.min(width, height) * 0.05; // ~5% of image = typical door swing
+  const doorRadius = Math.min(width, height) * 0.06; // ~6% of image = typical door swing
+  const minRadius = Math.min(width, height) * 0.04; // Minimum door size
   const searchStep = Math.floor(doorRadius / 2);
+  
+  // Define edge margins to ignore (scale indicators, legends, etc.)
+  const edgeMarginX = width * 0.1;  // Ignore 10% from left/right edges
+  const edgeMarginY = height * 0.1; // Ignore 10% from top/bottom edges
   
   for (let cy = searchStep; cy < height - searchStep; cy += searchStep) {
     for (let cx = searchStep; cx < width - searchStep; cx += searchStep) {
+      // Skip detections near edges (where scale indicators typically are)
+      if (cx < edgeMarginX || cx > width - edgeMarginX ||
+          cy < edgeMarginY || cy > height - edgeMarginY) {
+        // Only skip corners, not full edges (doors can be on outer walls)
+        const inCorner = (cx < edgeMarginX || cx > width - edgeMarginX) &&
+                        (cy < edgeMarginY || cy > height - edgeMarginY);
+        if (inCorner) continue;
+      }
+      
       // Check if this point is near a wall corner/intersection (likely door hinge point)
       const isNearWall = isNearWallIntersection(gray, cx, cy, width, height);
       if (!isNearWall) continue;
@@ -432,8 +455,10 @@ function findDoors(walls: DetectedWall[], imageData: ImageData): DetectedOpening
       // Check for quarter circle arc pattern
       const arcResult = detectDoorArc(gray, cx, cy, doorRadius, width, height);
       
-      if (arcResult.confidence > 0.25) {
-        const doorKey = `arc-${Math.round(cx / 40)}-${Math.round(cy / 40)}`;
+      // Higher threshold to avoid wall corner false positives
+      // Wall corners typically hit 0.31-0.38, so require > 0.50
+      if (arcResult.confidence > 0.50 && arcResult.arcLength > minRadius) {
+        const doorKey = `arc-${Math.round(cx / 50)}-${Math.round(cy / 50)}`;
         if (!visited.has(doorKey)) {
           visited.add(doorKey);
           doors.push({
@@ -491,7 +516,7 @@ function detectDoorArc(
   radius: number,
   width: number,
   height: number
-): { confidence: number; doorX: number; doorY: number; orientation: 'horizontal' | 'vertical' } {
+): { confidence: number; doorX: number; doorY: number; orientation: 'horizontal' | 'vertical'; arcLength: number } {
   // Check all 4 quadrant orientations
   const quadrants = [
     { startAngle: 0, endAngle: Math.PI / 2, dx: 1, dy: -1 },      // top-right
@@ -504,21 +529,28 @@ function detectDoorArc(
   let bestDoorX = cx;
   let bestDoorY = cy;
   let bestOrientation: 'horizontal' | 'vertical' = 'horizontal';
+  let bestArcLength = 0;
   
   for (const quad of quadrants) {
     // Sample points along the arc
     let arcPixels = 0;
     let totalSamples = 0;
+    let consecutiveDark = 0;
+    let maxConsecutive = 0;
     
-    for (let angle = quad.startAngle; angle <= quad.endAngle; angle += 0.15) {
+    for (let angle = quad.startAngle; angle <= quad.endAngle; angle += 0.1) {
       const px = Math.round(cx + radius * Math.cos(angle));
       const py = Math.round(cy + radius * Math.sin(angle));
       
       if (px >= 0 && px < width && py >= 0 && py < height) {
         totalSamples++;
         // Check if pixel is dark (part of arc) - threshold for dashed lines
-        if (gray[py][px] < 150) {
+        if (gray[py][px] < 140) {
           arcPixels++;
+          consecutiveDark++;
+          maxConsecutive = Math.max(maxConsecutive, consecutiveDark);
+        } else {
+          consecutiveDark = 0;
         }
       }
     }
@@ -527,7 +559,9 @@ function detectDoorArc(
     const confidence = totalSamples > 0 ? arcPixels / totalSamples : 0;
     
     // Confidence should be in the "dashed line" range, not solid or empty
-    const adjustedConfidence = (confidence > 0.2 && confidence < 0.7) ? confidence : 0;
+    // Also check that we have actual arc segments (consecutive dark pixels)
+    const hasDashedPattern = maxConsecutive >= 2 && maxConsecutive < totalSamples * 0.8;
+    const adjustedConfidence = (confidence > 0.25 && confidence < 0.65 && hasDashedPattern) ? confidence : 0;
     
     if (adjustedConfidence > bestConfidence) {
       bestConfidence = adjustedConfidence;
@@ -537,6 +571,7 @@ function detectDoorArc(
       // Orientation based on which way the door swings
       bestOrientation = (Math.abs(quad.dx) > 0 && quad.dy === -1) || 
                        (Math.abs(quad.dx) > 0 && quad.dy === 1) ? 'vertical' : 'horizontal';
+      bestArcLength = radius;
     }
   }
   
@@ -545,13 +580,15 @@ function detectDoorArc(
     doorX: bestDoorX,
     doorY: bestDoorY,
     orientation: bestOrientation,
+    arcLength: bestArcLength,
   };
 }
 
 /**
- * Flood fill to find a colored region's bounds
+ * Flood fill to find a door region's bounds
+ * Handles beige/cream and dark brown door colors
  */
-function floodFillRegion(
+function floodFillDoorRegion(
   data: Uint8ClampedArray,
   width: number,
   height: number,
@@ -563,12 +600,6 @@ function floodFillRegion(
   let minY = startY, maxY = startY;
   
   const stack = [[startX, startY]];
-  const tolerance = 50;
-  
-  const startI = (startY * width + startX) * 4;
-  const startR = data[startI];
-  const startG = data[startI + 1];
-  const startB = data[startI + 2];
   
   while (stack.length > 0 && stack.length < 5000) {
     const [x, y] = stack.pop()!;
@@ -582,12 +613,12 @@ function floodFillRegion(
     const g = data[i + 1];
     const b = data[i + 2];
     
-    const isSimilar = r > 100 && g > 30 && b < 150 && 
-                      Math.abs(r - startR) < tolerance &&
-                      Math.abs(g - startG) < tolerance &&
-                      Math.abs(b - startB) < tolerance;
+    // Light beige/cream door OR dark brown
+    const isBeige = r > 240 && g > 220 && b > 200 && r > b + 15 && g > b + 5;
+    const isBrownDark = r > 80 && r < 180 && g > 40 && g < 130 && b < 80 && r > g && r > b * 1.3;
+    const isDoor = isBeige || isBrownDark;
     
-    if (!isSimilar) continue;
+    if (!isDoor) continue;
     
     processed.add(key);
     
