@@ -63,6 +63,28 @@ A browser-based 3D scene editor built with React, Three.js, and TypeScript. Desi
 
 ## 📦 Installation
 
+### Quick Start (Recommended)
+
+**Linux / macOS:**
+```bash
+git clone https://github.com/VineethKumar7/3d-scene-editor.git
+cd 3d-scene-editor
+./start.sh          # Installs deps + starts server
+# Open http://localhost:5173
+./stop.sh           # Stop the server
+```
+
+**Windows:**
+```cmd
+git clone https://github.com/VineethKumar7/3d-scene-editor.git
+cd 3d-scene-editor
+start.bat           # Installs deps + starts server
+# Open http://localhost:5173
+stop.bat            # Stop the server (or Ctrl+C)
+```
+
+### Manual Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/VineethKumar7/3d-scene-editor.git
@@ -77,6 +99,11 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+### Requirements
+
+- **Node.js** 18+ (LTS recommended)
+- **npm** 8+
 
 ## 🧪 Testing
 
