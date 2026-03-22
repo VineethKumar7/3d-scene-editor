@@ -211,3 +211,35 @@
   padding: 4px 0;
   text-align: center;
 }
+
+/* Upload options */
+.upload-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sample-btn {
+  width: 100%;
+  background: #3a3a2d !important;
+  border-color: #5a5a3d !important;
+}
+
+.sample-btn:hover {
+  background: #4a4a3d !important;
+}
+
+.reset-btn {
+  width: 100%;
+  background: #2d3a4a !important;
+  border-color: #3d5a6a !important;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: #3d4a5a !important;
+}
+
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

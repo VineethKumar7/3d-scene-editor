@@ -130,12 +130,23 @@ function FloorPlanUpload() {
         style={{ display: 'none' }}
       />
       {!floorPlanUrl ? (
-        <button 
-          className="add-btn upload-btn"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          📤 Upload Plan
-        </button>
+        <div className="upload-options">
+          <button 
+            className="add-btn upload-btn"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            📤 Upload Plan
+          </button>
+          <button 
+            className="add-btn sample-btn"
+            onClick={() => {
+              setFloorPlan('/sample-floorplan.jpg');
+              setDetectionStatus(null);
+            }}
+          >
+            🏠 Load Sample
+          </button>
+        </div>
       ) : (
         <div className="floor-plan-controls">
           <div className="control-row">
@@ -172,6 +183,16 @@ function FloorPlanUpload() {
           {detectionStatus && (
             <div className="detection-status">{detectionStatus}</div>
           )}
+          
+          {/* Reset button - re-run detection to restore original positions */}
+          <button 
+            className="add-btn reset-btn"
+            onClick={handleDetectWalls}
+            disabled={isDetecting}
+            title="Re-run detection to restore original positions"
+          >
+            🔄 Reset to Original
+          </button>
           
           <button 
             className="add-btn remove-btn"
