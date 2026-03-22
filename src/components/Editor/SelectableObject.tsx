@@ -25,69 +25,34 @@ export function SelectableObject({ id }: SelectableObjectProps) {
     selectObject(id);
   };
 
-  // Windows need special rendering - glass panel with visible blue frame
+  // Windows - simple rectangular glass with frame
   if (isWindow) {
-    // Detect vertical window (on vertical wall): scale[0] < scale[2]
-    const isVerticalWindow = obj.scale[0] < obj.scale[2];
+    // Get dimensions from scale
+    const scaleX = obj.scale[0];
+    const scaleY = obj.scale[1];
+    const scaleZ = obj.scale[2];
     
-    // Use actual dimensions from scale for proper frame positioning
-    const width = isVerticalWindow ? obj.scale[2] : obj.scale[0];  // Width of window
-    const height = obj.scale[1];
-    const thickness = isVerticalWindow ? obj.scale[0] : obj.scale[2];
+    // Detect orientation: if X is thin, it's on a vertical wall (left/right)
+    const isVerticalWall = scaleX < scaleZ;
     
-    // Frame dimensions (absolute, not scaled)
-    const frameWidth = 0.08;
-    const frameDepth = 0.06;
+    // For vertical wall windows: rotate Y by 90° so the window faces the wall correctly
+    const rotation: [number, number, number] = isVerticalWall 
+      ? [obj.rotation[0], obj.rotation[1] + Math.PI / 2, obj.rotation[2]]
+      : obj.rotation;
     
-    if (isVerticalWindow) {
-      // Vertical window (on left/right wall) - rotated 90 degrees
-      return (
-        <group position={obj.position} rotation={obj.rotation}>
-          {/* Glass pane */}
-          <mesh onClick={handleClick} name={id}>
-            <boxGeometry args={[thickness, height, width]} />
-            <meshPhysicalMaterial
-              color="#4da6ff"
-              metalness={0}
-              roughness={0}
-              transmission={0.7}
-              transparent={true}
-              opacity={0.5}
-              side={THREE.DoubleSide}
-              emissive={isSelected ? '#444400' : '#003366'}
-              emissiveIntensity={isSelected ? 0.3 : 0.2}
-            />
-          </mesh>
-          {/* Frame - top */}
-          <mesh position={[0, height/2 - frameWidth/2, 0]}>
-            <boxGeometry args={[frameDepth, frameWidth, width]} />
-            <meshStandardMaterial color="#2196f3" roughness={0.5} />
-          </mesh>
-          {/* Frame - bottom */}
-          <mesh position={[0, -height/2 + frameWidth/2, 0]}>
-            <boxGeometry args={[frameDepth, frameWidth, width]} />
-            <meshStandardMaterial color="#2196f3" roughness={0.5} />
-          </mesh>
-          {/* Frame - front */}
-          <mesh position={[0, 0, width/2 - frameWidth/2]}>
-            <boxGeometry args={[frameDepth, height - frameWidth*2, frameWidth]} />
-            <meshStandardMaterial color="#2196f3" roughness={0.5} />
-          </mesh>
-          {/* Frame - back */}
-          <mesh position={[0, 0, -width/2 + frameWidth/2]}>
-            <boxGeometry args={[frameDepth, height - frameWidth*2, frameWidth]} />
-            <meshStandardMaterial color="#2196f3" roughness={0.5} />
-          </mesh>
-        </group>
-      );
-    }
+    // Window dimensions (always use the larger horizontal dimension as width)
+    const windowWidth = isVerticalWall ? scaleZ : scaleX;
+    const windowHeight = scaleY;
+    const glassThickness = 0.02;
     
-    // Horizontal window (on front/back wall)
+    // Frame dimensions
+    const frameSize = 0.06;
+    
     return (
-      <group position={obj.position} rotation={obj.rotation}>
+      <group position={obj.position} rotation={rotation}>
         {/* Glass pane */}
         <mesh onClick={handleClick} name={id}>
-          <boxGeometry args={[width, height, thickness]} />
+          <boxGeometry args={[windowWidth, windowHeight, glassThickness]} />
           <meshPhysicalMaterial
             color="#4da6ff"
             metalness={0}
@@ -101,36 +66,47 @@ export function SelectableObject({ id }: SelectableObjectProps) {
           />
         </mesh>
         {/* Frame - top */}
-        <mesh position={[0, height/2 - frameWidth/2, 0]}>
-          <boxGeometry args={[width, frameWidth, frameDepth]} />
+        <mesh position={[0, windowHeight/2 - frameSize/2, 0]}>
+          <boxGeometry args={[windowWidth, frameSize, frameSize]} />
           <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - bottom */}
-        <mesh position={[0, -height/2 + frameWidth/2, 0]}>
-          <boxGeometry args={[width, frameWidth, frameDepth]} />
+        <mesh position={[0, -windowHeight/2 + frameSize/2, 0]}>
+          <boxGeometry args={[windowWidth, frameSize, frameSize]} />
           <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - left */}
-        <mesh position={[-width/2 + frameWidth/2, 0, 0]}>
-          <boxGeometry args={[frameWidth, height - frameWidth*2, frameDepth]} />
+        <mesh position={[-windowWidth/2 + frameSize/2, 0, 0]}>
+          <boxGeometry args={[frameSize, windowHeight - frameSize*2, frameSize]} />
           <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - right */}
-        <mesh position={[width/2 - frameWidth/2, 0, 0]}>
-          <boxGeometry args={[frameWidth, height - frameWidth*2, frameDepth]} />
+        <mesh position={[windowWidth/2 - frameSize/2, 0, 0]}>
+          <boxGeometry args={[frameSize, windowHeight - frameSize*2, frameSize]} />
           <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
       </group>
     );
   }
 
-  // Doors need a door panel with handle
+  // Doors - use scale values directly in geometry (not as transform)
   if (isDoor) {
+    const doorHeight = obj.scale[1];
+    const doorThickness = 0.08; // Fixed thickness for visibility
+    
+    // Detect if door is on vertical wall (same logic as windows)
+    const isVerticalWall = obj.scale[0] < obj.scale[2];
+    const rotation: [number, number, number] = isVerticalWall 
+      ? [obj.rotation[0], obj.rotation[1] + Math.PI / 2, obj.rotation[2]]
+      : obj.rotation;
+    
+    const width = isVerticalWall ? obj.scale[2] : obj.scale[0];
+    
     return (
-      <group position={obj.position} rotation={obj.rotation} scale={obj.scale}>
+      <group position={obj.position} rotation={rotation}>
         {/* Door panel */}
         <mesh ref={meshRef} onClick={handleClick} name={id}>
-          <boxGeometry args={[1, 1, 0.05]} />
+          <boxGeometry args={[width, doorHeight, doorThickness]} />
           <meshStandardMaterial
             color={obj.material.color}
             metalness={obj.material.metalness}
@@ -140,12 +116,12 @@ export function SelectableObject({ id }: SelectableObjectProps) {
           />
         </mesh>
         {/* Door handle */}
-        <mesh position={[0.35, 0, 0.05]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.15, 8]} />
+        <mesh position={[width * 0.35, 0, doorThickness / 2 + 0.02]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.12, 8]} />
           <meshStandardMaterial color="#c0c0c0" metalness={0.8} roughness={0.2} />
         </mesh>
-        <mesh position={[0.35, 0, 0.12]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.015, 0.015, 0.08, 8]} />
+        <mesh position={[width * 0.35, 0, doorThickness / 2 + 0.06]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.015, 0.015, 0.06, 8]} />
           <meshStandardMaterial color="#c0c0c0" metalness={0.8} roughness={0.2} />
         </mesh>
       </group>

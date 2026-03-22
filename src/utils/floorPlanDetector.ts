@@ -663,9 +663,9 @@ export function convertOpeningsToScene(
   const pixelsPerMeter = imageWidth / scaleMeters;
   
   const doorHeight = 2.1;
-  const doorWidth = 0.9;
+  const doorWidthMin = 0.8;
   const windowHeight = 1.2;
-  const windowWidth = 1.0;
+  const windowWidthMin = 0.4;  // Lower minimum to preserve detected sizes
   const thickness = 0.15;
 
   const wallThickness = 0.2;
@@ -677,17 +677,28 @@ export function convertOpeningsToScene(
     const detectedWidth = opening.width / pixelsPerMeter;
 
     const height = type === 'door' ? doorHeight : windowHeight;
-    const width = type === 'door' ? Math.max(doorWidth, detectedWidth * 0.5) : Math.max(windowWidth, detectedWidth * 0.5);
+    // Use actual detected width, with reasonable minimum
+    const width = type === 'door' 
+      ? Math.max(doorWidthMin, detectedWidth * 0.8)  // Doors: 80% of detected
+      : Math.max(windowWidthMin, detectedWidth * 0.9);  // Windows: 90% of detected
     const yPos = type === 'door' ? height / 2 : 1.3 + height / 2; // Windows at 1.3m height
 
-    // Offset to place opening on interior wall surface (not inside wall geometry)
-    // Push toward scene center based on position
-    const offset = wallThickness / 2 + thickness / 2 + 0.05; // Small extra gap
+    // Offset windows to interior, doors to exterior (so both are visible)
+    const windowOffset = wallThickness / 2 + 0.02; // Interior surface
+    const doorOffset = wallThickness / 2 + thickness / 2 + 0.02; // Exterior surface
+    const offset = type === 'door' ? doorOffset : windowOffset;
     
     if (opening.orientation === 'horizontal') {
       // Horizontal opening on horizontal wall - offset in Z
-      if (z < 0) z += offset;  // Top wall: push toward interior (+Z)
-      else z -= offset;         // Bottom wall: push toward interior (-Z)
+      if (type === 'door') {
+        // Doors: offset to EXTERIOR (visible from outside)
+        if (z < 0) z -= offset;  // Top wall: push outward (-Z)
+        else z += offset;         // Bottom wall: push outward (+Z)
+      } else {
+        // Windows: offset to INTERIOR (visible from inside)
+        if (z < 0) z += offset;  // Top wall: push inward (+Z)
+        else z -= offset;         // Bottom wall: push inward (-Z)
+      }
       
       return {
         position: [x, yPos, z] as [number, number, number],
@@ -696,8 +707,15 @@ export function convertOpeningsToScene(
       };
     } else {
       // Vertical opening on vertical wall - offset in X
-      if (x < 0) x += offset;  // Left wall: push toward interior (+X)
-      else x -= offset;         // Right wall: push toward interior (-X)
+      if (type === 'door') {
+        // Doors: offset to EXTERIOR
+        if (x < 0) x -= offset;  // Left wall: push outward (-X)
+        else x += offset;         // Right wall: push outward (+X)
+      } else {
+        // Windows: offset to INTERIOR
+        if (x < 0) x += offset;  // Left wall: push inward (+X)
+        else x -= offset;         // Right wall: push inward (-X)
+      }
       
       return {
         position: [x, yPos, z] as [number, number, number],
