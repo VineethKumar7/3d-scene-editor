@@ -1,0 +1,145 @@
+.properties-panel {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 12px;
+  height: 100%;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.properties-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.properties-panel .empty-state {
+  color: #666;
+  font-style: italic;
+}
+
+.object-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: #2d2d2d;
+  border-radius: 4px;
+}
+
+.object-type {
+  text-transform: capitalize;
+  color: #888;
+  font-size: 11px;
+  background: #444;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.object-name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.property-section {
+  margin-bottom: 16px;
+  border-top: 1px solid #333;
+  padding-top: 12px;
+}
+
+.section-title {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.property-group {
+  margin-bottom: 12px;
+}
+
+.property-group > label {
+  display: block;
+  color: #888;
+  font-size: 11px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.xyz-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.axis-label {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 3px;
+}
+
+.axis-x { background: #c25050; }
+.axis-y { background: #50a050; }
+.axis-z { background: #5050c2; }
+
+.input-row input[type="number"] {
+  flex: 1;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+}
+
+.input-row input[type="number"]:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.color-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-input input[type="color"] {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-input span {
+  color: #888;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.property-group input[type="range"] {
+  width: 100%;
+  margin: 4px 0;
+}
+
+.slider-value {
+  display: block;
+  color: #888;
+  font-size: 11px;
+  font-family: monospace;
+  text-align: right;
+}

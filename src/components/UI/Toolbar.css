@@ -1,0 +1,123 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #1e1e1e;
+  padding: 8px 16px;
+  border-bottom: 1px solid #333;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.mode-buttons {
+  background: #2d2d2d;
+  border-radius: 6px;
+  padding: 4px;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.mode-btn:hover {
+  color: #fff;
+  background: #3d3d3d;
+}
+
+.mode-btn.active {
+  background: #4a6fa5;
+  color: #fff;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+.btn-label {
+  font-weight: 500;
+}
+
+.btn-key {
+  background: #444;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: monospace;
+}
+
+.mode-btn.active .btn-key {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.toggle-btn {
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #888;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.toggle-btn:hover {
+  background: #3d3d3d;
+  color: #fff;
+}
+
+.toggle-btn.active {
+  background: #3d5a3d;
+  border-color: #5a7a5a;
+  color: #8f8;
+}
+
+.toolbar-right {
+  margin-left: auto;
+}
+
+.keyboard-hints {
+  color: #666;
+  font-size: 11px;
+  font-family: monospace;
+}
+
+.snap-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.snap-select {
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.snap-select:focus {
+  outline: none;
+  border-color: #666;
+}

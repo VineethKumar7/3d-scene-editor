@@ -1,0 +1,213 @@
+.hierarchy-panel {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 12px;
+  height: 100%;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.hierarchy-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.scene-tree {
+  margin-bottom: 16px;
+}
+
+.tree-header {
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.empty-state {
+  color: #666;
+  font-style: italic;
+  padding-left: 20px;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.tree-item:hover {
+  background: #333;
+}
+
+.tree-item.selected {
+  background: #3a5a9a;
+}
+
+.tree-indent {
+  color: #666;
+  margin-right: 4px;
+  font-family: monospace;
+}
+
+.object-icon {
+  margin-right: 6px;
+}
+
+.object-name {
+  flex: 1;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.tree-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  color: #ff6b6b;
+}
+
+.add-object-section {
+  border-top: 1px solid #333;
+  padding-top: 12px;
+}
+
+.section-header {
+  color: #aaa;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.object-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.add-btn {
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.add-btn:hover {
+  background: #3d3d3d;
+  border-color: #555;
+}
+
+.add-btn.aec-btn {
+  background: #2a3a2d;
+  border-color: #3a5a3d;
+}
+
+.add-btn.aec-btn:hover {
+  background: #3a4a3d;
+  border-color: #4a6a4d;
+}
+
+.tree-item.locked {
+  opacity: 0.7;
+}
+
+.lock-icon {
+  font-size: 10px;
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+/* Floor Plan Section */
+.floor-plan-section {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.upload-btn {
+  width: 100%;
+  background: #2a3a4d !important;
+  border-color: #3a5a7d !important;
+}
+
+.upload-btn:hover {
+  background: #3a4a5d !important;
+}
+
+.floor-plan-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-row label {
+  font-size: 11px;
+  color: #888;
+  min-width: 60px;
+}
+
+.control-row input[type="number"] {
+  flex: 1;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.control-row input[type="range"] {
+  flex: 1;
+}
+
+.remove-btn {
+  background: #4a2d2d !important;
+  border-color: #6a3d3d !important;
+}
+
+.remove-btn:hover {
+  background: #5a3d3d !important;
+}
+
+.detect-btn {
+  width: 100%;
+  background: #2d4a2d !important;
+  border-color: #3d6a3d !important;
+  font-weight: 500;
+}
+
+.detect-btn:hover:not(:disabled) {
+  background: #3d5a3d !important;
+}
+
+.detect-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.detection-status {
+  font-size: 11px;
+  color: #8f8;
+  padding: 4px 0;
+  text-align: center;
+}
