@@ -50,36 +50,31 @@ const floorPlanDemo: DemoConfig = {
   filename: 'floor-plan-upload',
   width: 1280,
   height: 720,
-  duration: 8,
+  duration: 12,
   record: async (page: Page) => {
     await page.goto(BASE_URL);
     await wait(1500);
     
-    // Click Upload Plan button
-    const uploadBtn = page.getByRole('button', { name: /upload plan/i });
-    await uploadBtn.scrollIntoViewIfNeeded();
+    // Click Load Sample button
+    const sampleBtn = page.getByRole('button', { name: /load sample/i });
+    await sampleBtn.scrollIntoViewIfNeeded();
     await wait(500);
-    await uploadBtn.click();
-    await wait(500);
+    await sampleBtn.click();
+    await wait(2000);
     
-    // Upload a sample floor plan (we'll use a test image)
-    const fileInput = page.locator('input[type="file"]');
-    const testImage = path.join(__dirname, 'test-floorplan.png');
-    
-    if (fs.existsSync(testImage)) {
-      await fileInput.setInputFiles(testImage);
-      await wait(2000);
-      
-      // Click Auto-Detect Walls
-      const detectBtn = page.getByRole('button', { name: /auto-detect/i });
-      if (await detectBtn.isVisible()) {
-        await detectBtn.click();
-        await wait(3000);
-      }
-    } else {
-      console.log('  ⚠️  No test floor plan found, showing empty state');
-      await wait(2000);
+    // Click Auto-Detect Walls
+    const detectBtn = page.getByRole('button', { name: /auto-detect/i });
+    if (await detectBtn.isVisible()) {
+      await detectBtn.click();
+      await wait(4000);
     }
+    
+    // Orbit camera to show the result
+    await page.mouse.move(640, 400);
+    await page.mouse.down({ button: 'right' });
+    await page.mouse.move(750, 320, { steps: 25 });
+    await page.mouse.up({ button: 'right' });
+    await wait(2000);
   }
 };
 
