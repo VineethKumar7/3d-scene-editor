@@ -10,11 +10,11 @@ A browser-based 3D scene editor built with React, Three.js, and TypeScript. Desi
 
 | Add Elements | Transform Controls |
 |:------------:|:------------------:|
-| ![Add Elements](assets/add-elements.gif) | ![Transform Controls](assets/transform-controls.gif) |
+| ![Add Elements](assets/add-elements.gif?v=2) | ![Transform Controls](assets/transform-controls.gif?v=2) |
 
 | Grid Snapping | Floor Plan Upload |
 |:-------------:|:-----------------:|
-| ![Grid Snapping](assets/grid-snapping.gif) | ![Floor Plan Upload](assets/floor-plan-upload.gif) |
+| ![Grid Snapping](assets/grid-snapping.gif?v=2) | ![Floor Plan Upload](assets/floor-plan-upload.gif?v=2) |
 
 ### Floor Plan Processing
 - **Upload floor plans** (PNG, JPG, SVG) as reference overlays
