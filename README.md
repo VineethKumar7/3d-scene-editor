@@ -215,9 +215,19 @@ convertOpeningsToScene(openings: DetectedOpening[], type: 'door' | 'window', ...
 
 ## 📄 License
 
-**All Rights Reserved** © 2026 Vineeth Kumar
+This project is licensed under **CC BY-NC 4.0** (Creative Commons Attribution-NonCommercial 4.0 International).
 
-This software is proprietary. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited without express written permission from the author.
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+
+**You are free to:**
+- ✅ Share — copy and redistribute in any medium
+- ✅ Adapt — remix, transform, and build upon it
+
+**Under these terms:**
+- 📝 **Attribution** — Give credit, link to license, indicate changes
+- 🚫 **NonCommercial** — No commercial use without permission
+
+For commercial licensing, contact: k.vineeth26@gmail.com
 
 ---
 
