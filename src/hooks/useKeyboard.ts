@@ -4,10 +4,13 @@ import { useSceneStore } from '../store/sceneStore';
 
 export function useKeyboard() {
   const setMode = useEditorStore((s) => s.setMode);
+  const toggleGrid = useEditorStore((s) => s.toggleGrid);
   const selectedId = useSceneStore((s) => s.selectedId);
   const removeObject = useSceneStore((s) => s.removeObject);
   const duplicateObject = useSceneStore((s) => s.duplicateObject);
   const selectObject = useSceneStore((s) => s.selectObject);
+  const snapEnabled = useSceneStore((s) => s.snapEnabled);
+  const setSnapEnabled = useSceneStore((s) => s.setSnapEnabled);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -21,7 +24,9 @@ export function useKeyboard() {
           setMode('translate');
           break;
         case 'r':
-          setMode('rotate');
+          if (!e.ctrlKey && !e.metaKey) {
+            setMode('rotate');
+          }
           break;
         case 's':
           if (!e.ctrlKey && !e.metaKey) {
@@ -43,10 +48,18 @@ export function useKeyboard() {
         case 'escape':
           selectObject(null);
           break;
+        case 'x':
+          // Toggle snap
+          setSnapEnabled(!snapEnabled);
+          break;
+        case 'h':
+          // Toggle grid
+          toggleGrid();
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setMode, selectedId, removeObject, duplicateObject, selectObject]);
+  }, [setMode, selectedId, removeObject, duplicateObject, selectObject, snapEnabled, setSnapEnabled, toggleGrid]);
 }

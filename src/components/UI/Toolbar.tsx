@@ -73,7 +73,7 @@ export function Toolbar() {
 
       <div className="toolbar-section toolbar-right">
         <span className="keyboard-hints">
-          Del: Delete | Ctrl+D: Duplicate | Esc: Deselect
+          Del: Delete | Ctrl+D: Duplicate | Esc: Deselect | X: Snap | H: Grid
         </span>
       </div>
     </div>
