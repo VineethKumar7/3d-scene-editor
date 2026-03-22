@@ -49,9 +49,9 @@ export function SelectableObject({ id }: SelectableObjectProps) {
     const frameSize = 0.06;
     
     return (
-      <group position={obj.position} rotation={rotation}>
+      <group position={obj.position} rotation={rotation} name={id}>
         {/* Glass pane */}
-        <mesh onClick={handleClick} name={id}>
+        <mesh onClick={handleClick}>
           <boxGeometry args={[windowWidth, windowHeight, glassThickness]} />
           <meshPhysicalMaterial
             color="#4da6ff"
@@ -103,9 +103,9 @@ export function SelectableObject({ id }: SelectableObjectProps) {
     const width = isVerticalWall ? obj.scale[2] : obj.scale[0];
     
     return (
-      <group position={obj.position} rotation={rotation}>
+      <group position={obj.position} rotation={rotation} name={id}>
         {/* Door panel */}
-        <mesh ref={meshRef} onClick={handleClick} name={id}>
+        <mesh ref={meshRef} onClick={handleClick}>
           <boxGeometry args={[width, doorHeight, doorThickness]} />
           <meshStandardMaterial
             color={obj.material.color}

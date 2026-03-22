@@ -683,9 +683,10 @@ export function convertOpeningsToScene(
       : Math.max(windowWidthMin, detectedWidth * 0.9);  // Windows: 90% of detected
     const yPos = type === 'door' ? height / 2 : 1.3 + height / 2; // Windows at 1.3m height
 
-    // Offset windows to interior, doors to exterior (so both are visible)
-    const windowOffset = wallThickness / 2 + 0.02; // Interior surface
-    const doorOffset = wallThickness / 2 + thickness / 2 + 0.02; // Exterior surface
+    // Offset to wall surface (windows interior, doors exterior)
+    // Place flush with wall surface, not floating
+    const windowOffset = wallThickness / 2 + 0.01; // Just past interior surface
+    const doorOffset = wallThickness / 2 + 0.01; // Just past exterior surface  
     const offset = type === 'door' ? doorOffset : windowOffset;
     
     if (opening.orientation === 'horizontal') {
