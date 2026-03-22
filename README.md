@@ -6,6 +6,16 @@ A browser-based 3D scene editor built with React, Three.js, and TypeScript. Desi
 
 ## ✨ Features
 
+### Demo
+
+| Add Elements | Transform Controls |
+|:------------:|:------------------:|
+| ![Add Elements](assets/add-elements.gif) | ![Transform Controls](assets/transform-controls.gif) |
+
+| Grid Snapping | Floor Plan Upload |
+|:-------------:|:-----------------:|
+| ![Grid Snapping](assets/grid-snapping.gif) | ![Floor Plan Upload](assets/floor-plan-upload.gif) |
+
 ### Floor Plan Processing
 - **Upload floor plans** (PNG, JPG, SVG) as reference overlays
 - **Auto-detect walls** from dark lines using computer vision
