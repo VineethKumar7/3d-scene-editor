@@ -427,50 +427,9 @@ function findDoors(_walls: DetectedWall[], imageData: ImageData): DetectedOpenin
     }
   }
 
-  // METHOD 2: Find door swing arcs (dashed quarter circles for interior doors)
-  // Look for arc patterns near wall intersections
-  const doorRadius = Math.min(width, height) * 0.06; // ~6% of image = typical door swing
-  const minRadius = Math.min(width, height) * 0.04; // Minimum door size
-  const searchStep = Math.floor(doorRadius / 2);
-  
-  // Define edge margins to ignore (scale indicators, legends, etc.)
-  const edgeMarginX = width * 0.1;  // Ignore 10% from left/right edges
-  const edgeMarginY = height * 0.1; // Ignore 10% from top/bottom edges
-  
-  for (let cy = searchStep; cy < height - searchStep; cy += searchStep) {
-    for (let cx = searchStep; cx < width - searchStep; cx += searchStep) {
-      // Skip detections near edges (where scale indicators typically are)
-      if (cx < edgeMarginX || cx > width - edgeMarginX ||
-          cy < edgeMarginY || cy > height - edgeMarginY) {
-        // Only skip corners, not full edges (doors can be on outer walls)
-        const inCorner = (cx < edgeMarginX || cx > width - edgeMarginX) &&
-                        (cy < edgeMarginY || cy > height - edgeMarginY);
-        if (inCorner) continue;
-      }
-      
-      // Check if this point is near a wall corner/intersection (likely door hinge point)
-      const isNearWall = isNearWallIntersection(gray, cx, cy, width, height);
-      if (!isNearWall) continue;
-      
-      // Check for quarter circle arc pattern
-      const arcResult = detectDoorArc(gray, cx, cy, doorRadius, width, height);
-      
-      // Higher threshold to avoid wall corner false positives
-      // Wall corners typically hit 0.31-0.38, so require > 0.50
-      if (arcResult.confidence > 0.50 && arcResult.arcLength > minRadius) {
-        const doorKey = `arc-${Math.round(cx / 50)}-${Math.round(cy / 50)}`;
-        if (!visited.has(doorKey)) {
-          visited.add(doorKey);
-          doors.push({
-            position: { x: arcResult.doorX, y: arcResult.doorY },
-            width: doorRadius * 1.5,
-            type: 'door',
-            orientation: arcResult.orientation,
-          });
-        }
-      }
-    }
-  }
+  // NOTE: Arc detection for interior doors disabled - too many false positives
+  // Interior door detection requires ML/edge detection for reliable results
+  // For portfolio demo, color-based external door detection is sufficient
 
   return doors;
 }
@@ -709,23 +668,37 @@ export function convertOpeningsToScene(
   const windowWidth = 1.0;
   const thickness = 0.15;
 
+  const wallThickness = 0.2;
+  
   return openings.map((opening) => {
     // Convert from image coords to centered scene coords
-    const x = (opening.position.x / imageWidth) * scaleMeters - scaleMeters / 2;
-    const z = (opening.position.y / imageHeight) * scaleZ - scaleZ / 2;
+    let x = (opening.position.x / imageWidth) * scaleMeters - scaleMeters / 2;
+    let z = (opening.position.y / imageHeight) * scaleZ - scaleZ / 2;
     const detectedWidth = opening.width / pixelsPerMeter;
 
     const height = type === 'door' ? doorHeight : windowHeight;
     const width = type === 'door' ? Math.max(doorWidth, detectedWidth * 0.5) : Math.max(windowWidth, detectedWidth * 0.5);
     const yPos = type === 'door' ? height / 2 : 1.3 + height / 2; // Windows at 1.3m height
 
+    // Offset to place opening on interior wall surface (not inside wall geometry)
+    // Push toward scene center based on position
+    const offset = wallThickness / 2 + thickness / 2 + 0.05; // Small extra gap
+    
     if (opening.orientation === 'horizontal') {
+      // Horizontal opening on horizontal wall - offset in Z
+      if (z < 0) z += offset;  // Top wall: push toward interior (+Z)
+      else z -= offset;         // Bottom wall: push toward interior (-Z)
+      
       return {
         position: [x, yPos, z] as [number, number, number],
         scale: [width, height, thickness] as [number, number, number],
         rotation: [0, 0, 0] as [number, number, number],
       };
     } else {
+      // Vertical opening on vertical wall - offset in X
+      if (x < 0) x += offset;  // Left wall: push toward interior (+X)
+      else x -= offset;         // Right wall: push toward interior (-X)
+      
       return {
         position: [x, yPos, z] as [number, number, number],
         scale: [thickness, height, width] as [number, number, number],

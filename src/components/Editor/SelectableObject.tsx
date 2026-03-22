@@ -25,44 +25,100 @@ export function SelectableObject({ id }: SelectableObjectProps) {
     selectObject(id);
   };
 
-  // Windows need special rendering - glass panel with frame
+  // Windows need special rendering - glass panel with visible blue frame
   if (isWindow) {
+    // Detect vertical window (on vertical wall): scale[0] < scale[2]
+    const isVerticalWindow = obj.scale[0] < obj.scale[2];
+    
+    // Use actual dimensions from scale for proper frame positioning
+    const width = isVerticalWindow ? obj.scale[2] : obj.scale[0];  // Width of window
+    const height = obj.scale[1];
+    const thickness = isVerticalWindow ? obj.scale[0] : obj.scale[2];
+    
+    // Frame dimensions (absolute, not scaled)
+    const frameWidth = 0.08;
+    const frameDepth = 0.06;
+    
+    if (isVerticalWindow) {
+      // Vertical window (on left/right wall) - rotated 90 degrees
+      return (
+        <group position={obj.position} rotation={obj.rotation}>
+          {/* Glass pane */}
+          <mesh onClick={handleClick} name={id}>
+            <boxGeometry args={[thickness, height, width]} />
+            <meshPhysicalMaterial
+              color="#4da6ff"
+              metalness={0}
+              roughness={0}
+              transmission={0.7}
+              transparent={true}
+              opacity={0.5}
+              side={THREE.DoubleSide}
+              emissive={isSelected ? '#444400' : '#003366'}
+              emissiveIntensity={isSelected ? 0.3 : 0.2}
+            />
+          </mesh>
+          {/* Frame - top */}
+          <mesh position={[0, height/2 - frameWidth/2, 0]}>
+            <boxGeometry args={[frameDepth, frameWidth, width]} />
+            <meshStandardMaterial color="#2196f3" roughness={0.5} />
+          </mesh>
+          {/* Frame - bottom */}
+          <mesh position={[0, -height/2 + frameWidth/2, 0]}>
+            <boxGeometry args={[frameDepth, frameWidth, width]} />
+            <meshStandardMaterial color="#2196f3" roughness={0.5} />
+          </mesh>
+          {/* Frame - front */}
+          <mesh position={[0, 0, width/2 - frameWidth/2]}>
+            <boxGeometry args={[frameDepth, height - frameWidth*2, frameWidth]} />
+            <meshStandardMaterial color="#2196f3" roughness={0.5} />
+          </mesh>
+          {/* Frame - back */}
+          <mesh position={[0, 0, -width/2 + frameWidth/2]}>
+            <boxGeometry args={[frameDepth, height - frameWidth*2, frameWidth]} />
+            <meshStandardMaterial color="#2196f3" roughness={0.5} />
+          </mesh>
+        </group>
+      );
+    }
+    
+    // Horizontal window (on front/back wall)
     return (
-      <group position={obj.position} rotation={obj.rotation} scale={obj.scale}>
+      <group position={obj.position} rotation={obj.rotation}>
         {/* Glass pane */}
         <mesh onClick={handleClick} name={id}>
-          <boxGeometry args={[1, 1, 0.02]} />
+          <boxGeometry args={[width, height, thickness]} />
           <meshPhysicalMaterial
-            color="#88ccff"
+            color="#4da6ff"
             metalness={0}
             roughness={0}
-            transmission={0.9}
+            transmission={0.7}
             transparent={true}
-            opacity={0.3}
+            opacity={0.5}
             side={THREE.DoubleSide}
-            emissive={isSelected ? '#444400' : '#000000'}
-            emissiveIntensity={isSelected ? 0.3 : 0}
+            emissive={isSelected ? '#444400' : '#003366'}
+            emissiveIntensity={isSelected ? 0.3 : 0.2}
           />
         </mesh>
         {/* Frame - top */}
-        <mesh position={[0, 0.45, 0]}>
-          <boxGeometry args={[1, 0.1, 0.08]} />
-          <meshStandardMaterial color="#404040" roughness={0.5} />
+        <mesh position={[0, height/2 - frameWidth/2, 0]}>
+          <boxGeometry args={[width, frameWidth, frameDepth]} />
+          <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - bottom */}
-        <mesh position={[0, -0.45, 0]}>
-          <boxGeometry args={[1, 0.1, 0.08]} />
-          <meshStandardMaterial color="#404040" roughness={0.5} />
+        <mesh position={[0, -height/2 + frameWidth/2, 0]}>
+          <boxGeometry args={[width, frameWidth, frameDepth]} />
+          <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - left */}
-        <mesh position={[-0.45, 0, 0]}>
-          <boxGeometry args={[0.1, 0.8, 0.08]} />
-          <meshStandardMaterial color="#404040" roughness={0.5} />
+        <mesh position={[-width/2 + frameWidth/2, 0, 0]}>
+          <boxGeometry args={[frameWidth, height - frameWidth*2, frameDepth]} />
+          <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
         {/* Frame - right */}
-        <mesh position={[0.45, 0, 0]}>
-          <boxGeometry args={[0.1, 0.8, 0.08]} />
-          <meshStandardMaterial color="#404040" roughness={0.5} />
+        <mesh position={[width/2 - frameWidth/2, 0, 0]}>
+          <boxGeometry args={[frameWidth, height - frameWidth*2, frameDepth]} />
+          <meshStandardMaterial color="#2196f3" roughness={0.5} />
         </mesh>
       </group>
     );
